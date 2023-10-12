@@ -32,4 +32,18 @@ fs.readFile('public/txtfiles/vanasonad.txt', 'utf8', (err, data)=>{
 
 });
 
+app.get('/namelist', (req, res)=>{
+let namelist = [];
+fs.readFile('public/txtfiles/log.txt', 'utf8', (err, data)=>{
+	if(err){
+		throw err;
+	}
+		else {
+			namelist = data.replaceALL(",", " ").split(';');
+			res.render('namelist', {h1: 'nimed', name: namelist});
+		}
+	});
+
+});
+
 app.listen(5109);
