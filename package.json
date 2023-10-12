@@ -1,0 +1,30 @@
+{
+  "name": "vp2023",
+  "version": "1.0.0",
+  "description": "Veebiprogrammeerimise kursuse projekt",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://kryrass@github.com/kryrass/veeb.git"
+  },
+  "keywords": [
+    "veebiprogrammeerimine",
+    "nodeJs",
+    "expressJs",
+    "Tallinna",
+    "Ülikool"
+  ],
+  "author": "Kryslin Rass",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kryrass/veeb/issues"
+  },
+  "homepage": "https://github.com/kryrass/veeb#readme",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
+  }
+}
