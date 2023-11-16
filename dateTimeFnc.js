@@ -28,6 +28,11 @@ const timeNowET = function(){
 	return timeNow.getHours() + ":" + timeNow.getMinutes() + ":" + timeNow.getSeconds();
 }
 
+const dateSqlEN = function(){
+	let timeNow = new Date();
+	return timeNow.getFullYear() + "-" + (timeNow.getMonth() + 1) + "-" + timeNow.getDate();
+}
+
 const timeOfDayET = function(){
 	let dayPart = "suvaline aeg";
 	const hourNow = new Date().getHours();
@@ -47,4 +52,4 @@ const timeOfDayET = function(){
 }
 
 //moodul ekspordib need asjad
-module.exports = {dateNowET: dateNowET, timeNowET: timeNowET, monthtsET: monthNamesET, timeOfDayET: timeOfDayET, dateNowEN: dateNowEN, timeNowEN: timeNowEN, dateNowENShort: dateNowENShort, monthsEN: monthNamesEN};
+module.exports = {dateNowET: dateNowET, timeNowET: timeNowET, dateSqlEN: dateSqlEN, monthtsET: monthNamesET, timeOfDayET: timeOfDayET, dateNowEN: dateNowEN, timeNowEN: timeNowEN, dateNowENShort: dateNowENShort, monthsEN: monthNamesEN};

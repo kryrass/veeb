@@ -13,6 +13,9 @@
 	</ul>
 	<hr>
 	<h2>Viimased uudised</h2>
-	
+
+	<% readnews.forEach(function(news){ 5>
+		<li><a href="/news/read/<% news.id %>"><%= news.title %></a></li>
+	<%> }); %>
 </body>
 </html>
