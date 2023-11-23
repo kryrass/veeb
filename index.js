@@ -8,6 +8,7 @@ const dbInfo = require('../../vp23config.js');
 const multer = require('multer'); //fotode laadimiseks
 const upload = multer({dest: './public/gallery/orig'}); //vahevara, mis määrab üleslaadimise kataloogi
 const sharp = require('sharp');
+const async = require('async');
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -61,7 +62,7 @@ fs.readFile('public/txtfiles/log.txt', 'utf8', (err, data)=>{
 	});
 
 });
-/*
+
 app.get('/eestifilm', (req, res)=>{
 	res.render('filmindex');
 });
@@ -87,7 +88,45 @@ app.get('/eestifilm/filmiloend', (req, res)=>{
 app.get('/eestifilm/addfilmperson', (req, res)=>{
 	res.render('addfilmperson');
 });
-*/
+
+app.get('/eestifilm/addfilmrelation', (req, res)=>{
+	const myQueries = [
+		function(callback){
+			conn.execute('SELECT id,first_name,last_name FROM person', (err, result)=>{
+				if(err){
+					return callback(err);
+				}
+				else {
+					return callback(null, result);
+				}
+			});
+		}, 
+		function(callback){
+			conn.execute('SELECT id,title FROM movie', (err, result)=>{
+				if(err){
+					return callback(err);
+				}
+				else {
+					return callback(null, result);
+				}
+			}); 
+		}
+	];
+
+	async.parallel(myQueries, (err, results)=>{
+		if(err){
+			throw err;
+		}
+		else {
+			//siin kõik asjad, mis on vaja teha
+			console.log(results);
+		}
+	});
+
+	res.render('addfilmrelation');
+});
+
+
 app.get('/news', (req, res)=> {
 	res.render('news');
 });
@@ -140,7 +179,7 @@ app.get('/news/read/:id/:lang', (req, res)=> {
 	console.log(req.query);
 	res.send('Tahame uudist, mille id on: ' + req.params.id);
 });
-/*
+
 app.post('/eestifilm/addfilmperson', (req, res)=>{
 	//res.render('filmindex');
 	//res.send("req.body");
@@ -180,7 +219,7 @@ let notice = '';
 		}
 	});
 });
-*/
+
 
 app.get('/photoupload', (req, res)=> {
 	res.render('photoupload');
