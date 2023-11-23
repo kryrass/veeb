@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Andrus Rinde, veebiprogrammeerimine 2023</title>
+	<title>Kryslin Rass, veebiprogrammeerimine 2023</title>
 	<link rel="stylesheet" href="/style/gallery.css">
 </head>
 <body>
@@ -16,12 +16,17 @@
 	<div class="gallery">
 	
 	
-		<!--Järgneb korduv osa, iga pisipildi jaoks oma-->
-		<div class="thumbgallery">
-			<img src="gallery/thumbs/thumbsvp_1700145754869" alt="Tark karu" data-filename="thumbsvp_1700145754869.jpg" data-id="1" class="thumbs"> <!-- need nimed valed millegipärast need thumbs rindel pole-->
-			<p></p> 
-		</div>
-	
+	<!-- 	Järgneb korduv osa, iga pisipildi jaoks oma-->
+		<!-- <div class="thumbgallery">
+			<img src="gallery/thumbs/vp_1700689586742.jpg" alt="Tallinna jõuluturg" data-filename="vp_1700689586742.jpg" data-id="1" class="thumbs">  -->
+			<!--<p></p> 
+		</div> -->
+			<% photoList.forEach(function(photo){ %>
+				<div class="thumbgallery">
+						<img src="gallery/thumbs/<%=photo.filename%>" alt="<%if(photo.alttext != ''){%><%=photo.alttext%><%}else{%>Galeriipilt<%}%>" data-filename="<%=photo.filename%>" data-id="<%=photo.id%>" class="thumbs">
+						<p></p>
+				</div>
+			<% }); %>
 	
 	</div>
 </body>

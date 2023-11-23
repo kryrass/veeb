@@ -192,13 +192,12 @@ app.post('/photoupload', upload.single('photoInput'), (req, res)=>{
 	console.log(req.body);
 	const fileName = 'vp_' + Date.now() + '.jpg';
 	//fs.rename(req.file.path, './public/gallery/orig' + req.file.originalname, (err)=>{
-	fs.rename(req.file.path, './public/gallery/orig' + fileName, (err)=>{
+	fs.rename(req.file.path, './public/gallery/orig/' + fileName, (err)=>{
 		console.log('Faili laadimise viga' + err);
 	});
 	//loome kaks väiksema mõõduga pildivarianti
-	sharp('./public/gallery/orig' + fileName).resize(100,100).jpeg({quality:90}).toFile('./public/gallery/thumbs/' + fileName);
-	sharp('./public/gallery/orig' + fileName).resize(800,600).jpeg({quality:90}).toFile('./public/gallery/normal/' + fileName);
-
+	sharp('./public/gallery/orig/' + fileName).resize(100,100).jpeg({quality : 90}).toFile('./public/gallery/thumbs/' + fileName);
+	sharp('./public/gallery/orig/' + fileName).resize(800,600).jpeg({quality : 90}).toFile('./public/gallery/normal/' + fileName);
 	//foto andmed andmetabelisse
 	let sql = 'INSERT INTO vp_gallery (filename, originalname, alttext, privacy, userid) VALUES (?, ?, ?, ?, ?)';
 	const userid = 1;
@@ -217,10 +216,20 @@ app.post('/photoupload', upload.single('photoInput'), (req, res)=>{
 });
 
 app.get('/photogallery', (req, res)=> {
-
-	//andmebaasist tuleb lugeda piltide id, filename ja alttext
-	
-	res.render('photogallery');
+	let photoList = [];
+	let sql = 'SELECT id,filename,alttext FROM vp_gallery WHERE privacy > 1 AND deleted IS NULL ORDER BY id DESC';
+	conn.execute(sql, (err,result)=>{
+		if (err){
+			throw err;
+			res.render('photogallery', {photoList : photoList});
+		}
+		else {
+			photoList = result;
+			console.log(result);
+			res.render('photogallery', {photoList : photoList});
+		}
+	});
 });
+
 
 app.listen(5109);
