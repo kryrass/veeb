@@ -9,6 +9,12 @@ const multer = require('multer'); //fotode laadimiseks
 const upload = multer({dest: './public/gallery/orig'}); //vahevara, mis määrab üleslaadimise kataloogi
 const sharp = require('sharp');
 const async = require('async');
+//paroolide krüpteerimiseks
+const bcrypt = require('bcrypt');
+const session = require('express-session');
+
+app.use(session({secret: 'minuAbsoluutseltSalajaneVõti', saveUninitialized: true, resave: true}));
+let mySession;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -26,7 +32,103 @@ const conn = mysql.createConnection({
 app.get('/', (req, res)=>{
 	//res.send('See töötab!');
 	//res.download('index.js');
-	res.render('index');
+	res.render('index'); //, {notice: notice});
+});
+
+app.post('/', (req, res)=>{
+	let notice = 'Sisesta oma kasutjakonto andmed!';
+	if(!req.body.emailInput || !req.body.passwordInput){
+		console.log('Paha!');
+		res.render('index', {notice: notice});
+	}
+	else {
+		console.log('Hea!');
+		let sql = 'SELECT password FROM vp_users WHERE email = ?';
+		conn.execute(sql, [req.body.emailInput], (err, result)=>{
+			if(err) {
+				notice = 'Tehnilise vea tõttu ei saa sisse logida!';
+				console.log(notice);
+				res.render('index', {notice: notice});
+			}
+			else {
+				//console.log(result);
+				if(result[0] != null){
+				console.log(result[0].password);
+				bcrypt.compare(req.body.passwordInput, result[0].password, (err, compareresult)=>{
+					if(err) {
+						throw err;
+					}
+					else {
+						if(compareresult){
+							mySession = req.session;
+							mySession.userName = req.body.emailInput;
+							notice = mySession.userName + ' on sisse loginud!';
+							console.log(notice);
+							res.render('index', {notice: notice});
+
+						}
+						else {
+							notice= 'Kasutajatunnus või parool oli vigane!';
+							console.log(notice);
+							res.render('index', {notice: notice});
+
+						}
+					}
+				});
+				}
+				else {
+					notice = 'Kasutajatunnus või parool oli vigane!';
+					console.log(notice);
+					res.remder('index', {notice: notice})
+				}
+			}
+		});
+		//res.render('index', {notice: notice});
+	}
+});
+
+app.get('/logout', (req, res)=>{
+	req.session.destroy();
+	mySession = null;
+	console.log('Logi välja');
+	res.redirect('/');
+});
+
+app.get('/signup', (req, res)=>{
+	
+	res.render('signup');
+});
+
+app.post('/signup', (req, res)=>{
+	let notice = 'Ootan andmeid!';
+	console.log(req.body);
+	if(!req.body.firstNameInput || !req.body.lastNameInput || !req.body.genderInput || !req.body.birthInput || !req.body.emailInput || req.body.passwordInput.length < 8 || req.body.passwordInput !== req.body.confirmPasswordInput){
+		console.log('Andmeid on puudu või pole nad korrektsed!');
+		notice = 'Andmeid on puudu või pole nad korrektsed!';
+		res.render('signup', {notice: notice});
+	}
+	else {
+		console.log('Ok!');
+		bcrypt.genSalt(10, (err, salt)=> {
+			bcrypt.hash(req.body.passwordInput, salt, (err, pwdhash)=>{
+				let sql = 'INSERT INTO vp_users (firstname, lastname, birthdate, gender, email, password) VALUES(?,?,?,?,?,?)';
+				conn.execute(sql, [req.body.firstNameInput, req.body.lastNameInput, req.body.birthInput, req.body.genderInput, req.body.emailInput, pwdhash], (err, result)=>{
+					if(err){
+						console.log(err);
+						notice = 'Tehnilistel põhjustel kasutajat ei loodud!';
+						res.render('signup', {notice: notice});
+					}
+					else {
+						console.log('kasutaja loodud');
+						notice = 'Kasutaja ' + req.body.emailInput + ' edukalt loodud!';
+						res.render('signup', {notice: notice});
+					}
+				});
+			});
+		});
+	}
+	
+	//res.render('signup');
 });
 
 app.get('/timenow', (req, res)=>{
@@ -221,7 +323,7 @@ let notice = '';
 });
 
 
-app.get('/photoupload', (req, res)=> {
+app.get('/photoupload', checkLogin, (req, res)=> {
 	res.render('photoupload');
 });
 
@@ -270,5 +372,23 @@ app.get('/photogallery', (req, res)=> {
 	});
 });
 
+function checkLogin(req, res, next){
+	console.log('kontrollime sisselogimist');
+	if(req.session != null){
+		if(mySession.userName){
+			console.log('Täitsa sees on!');
+			next();
+		}
+		else {
+			console.log('Ei ole üldse sees');
+			res.redirect('/');
+		}
+	}
+	else {
+		res.redirect('/');
+
+	}
+	
+}
 
 app.listen(5109);
